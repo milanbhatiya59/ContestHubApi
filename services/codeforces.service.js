@@ -1,64 +1,66 @@
 import axios from "axios";
 
-const fetchCodeforcesContests = async () => {
+// Convert UTC timestamp to Indian Standard Time (IST) and format it
+const formatDateIST = (date) => {
+  const options = {
+    hour: "numeric",
+    minute: "2-digit",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+    hour12: true,
+    timeZone: "Asia/Kolkata", // Indian Time Zone
+  };
+
+  const formattedDate = date.toLocaleString("en-IN", options);
+
+  // Format "8:00 PM, 26 March 2025" to "8:00 PM 26 March 2025"
+  return formattedDate.replace("at ", "").replace("pm", "PM").replace("am", "AM");
+};
+
+// Fetch past Codeforces contests (last 50 finished)
+const getPastCodeforcesContests = async () => {
   try {
     const response = await axios.get("https://codeforces.com/api/contest.list");
     const contests = response.data.result;
 
-    // Extract ongoing and future contests
-    const currentAndUpcomingContests = contests.filter(
-      (contest) => contest.phase === "BEFORE" || contest.phase === "CODING"
-    );
+    const pastContests = contests.filter((contest) => contest.phase === "FINISHED").slice(0, 50);
 
-    // Extract last 50 finished contests
-    const pastContests = contests.filter((contest) => contest.phase === "FINISHED").slice(0, 50); // Get the most recent 50 finished contests
-
-    // Format contests
-    const formattedContests = [...currentAndUpcomingContests, ...pastContests].map((contest) => ({
+    return pastContests.map((contest) => ({
       name: contest.name,
       platform: "Codeforces",
-      startTime: formatDate(new Date(contest.startTimeSeconds * 1000)), // Convert from seconds
-      timeRemaining: getTimeRemaining(new Date(contest.startTimeSeconds * 1000), contest.phase),
-      status: contest.phase, // BEFORE, CODING, or FINISHED
+      startTime: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
+      duration: contest.durationSeconds / 60, // Convert duration to minutes
+      status: contest.phase,
       url: `https://codeforces.com/contest/${contest.id}`,
     }));
-
-    console.log(formattedContests);
-
-    return formattedContests;
   } catch (error) {
-    console.error("Error fetching Codeforces contests:", error);
+    console.error("Error fetching past Codeforces contests:", error);
     return [];
   }
 };
 
-// Format Date as "YYYY-MM-DD HH:mm UTC"
-const formatDate = (date) => {
-  return new Intl.DateTimeFormat("en-GB", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "UTC",
-  }).format(date);
+// Fetch current and upcoming Codeforces contests
+const getCurrentAndUpcomingCodeforcesContests = async () => {
+  try {
+    const response = await axios.get("https://codeforces.com/api/contest.list");
+    const contests = response.data.result;
+
+    const currentAndUpcomingContests = contests.filter(
+      (contest) => contest.phase === "BEFORE" || contest.phase === "CODING"
+    );
+
+    return currentAndUpcomingContests.map((contest) => ({
+      platform: "Codeforces",
+      name: contest.name,
+      start_time: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
+      duration: contest.durationSeconds / 60, // Convert duration to minutes
+    }));
+  } catch (error) {
+    console.error("Error fetching current and upcoming Codeforces contests:", error);
+    return [];
+  }
 };
 
-// Get time remaining (in HH:MM:SS or "Started" / "Finished")
-const getTimeRemaining = (startDate, phase) => {
-  const now = new Date();
-  const diffMs = startDate - now; // Difference in milliseconds
-
-  if (phase === "FINISHED") return "Finished";
-  if (diffMs <= 0) return "Started"; // Contest already started
-
-  const hours = Math.floor(diffMs / (1000 * 60 * 60));
-  const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-  return `${hours}h ${minutes}m ${seconds}s`;
-};
-
-fetchCodeforcesContests();
-
-// module.exports = { fetchCodeforcesContests };
+// Export functions for external use
+export { getCurrentAndUpcomingCodeforcesContests, getPastCodeforcesContests };

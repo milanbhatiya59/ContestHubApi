@@ -12,7 +12,11 @@ app.use(express.static("public"));
 app.use(cookieParser());
 
 //routes import
+import pastContestsRoutes from "./routes/past-contests.routes.js";
+import upcomingContestsRoutes from "./routes/upcoming-contests.routes.js";
 
 //routes declaration
+app.use("/api/v1/past-contests", pastContestsRoutes);
+app.use("/api/v1/upcoming-contests", upcomingContestsRoutes);
 
 export { app };

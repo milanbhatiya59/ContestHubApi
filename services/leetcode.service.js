@@ -1,26 +1,14 @@
 import axios from "axios";
 
-// Configuration variables
-const HOST = "localhost"; // Not used in the final output
-const RID = -1; // Not used in the final output
-const TIMEZONE = "Asia/Kolkata"; // IANA timezone for India (for reference)
-
 // Helper function to format the date
 function formatDate(epochSeconds) {
-  // Convert epoch seconds to a Date object (assumes the timestamp is in seconds)
   const date = new Date(epochSeconds * 1000);
-
-  // Extract hour and minute
   let hours = date.getHours();
   const minutes = date.getMinutes();
   const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
-  if (hours === 0) hours = 12; // handle midnight (0 becomes 12)
-
-  // Format minutes to always have two digits
+  if (hours === 0) hours = 12;
   const minutesStr = minutes < 10 ? "0" + minutes : minutes;
-
-  // Get day, month and year
   const day = date.getDate();
   const months = [
     "January",
@@ -38,33 +26,33 @@ function formatDate(epochSeconds) {
   ];
   const monthName = months[date.getMonth()];
   const year = date.getFullYear();
-
-  // Return formatted string like "8:00 AM 15-March-2025"
-  return `${hours}:${minutesStr} ${ampm} ${day}-${monthName}-${year}`;
+  const start_time = `${day} ${monthName} ${year} ${hours}:${minutesStr} ${ampm}`;
+  return start_time;
 }
 
-async function fetchContests() {
+// Fetch LeetCode contests
+async function fetchLeetCodeContests() {
   const url = "https://leetcode.com/graphql";
   const query = `
-{
-  brightTitle
-  allContests {
-    containsPremium
-    title
-    cardImg
-    titleSlug
-    description
-    startTime
-    duration
-    originStartTime
-    isVirtual
-    company {
-      watermark
+  {
+    brightTitle
+    allContests {
+      containsPremium
+      title
+      cardImg
+      titleSlug
+      description
+      startTime
+      duration
+      originStartTime
+      isVirtual
+      company {
+        watermark
+        __typename
+      }
       __typename
     }
-    __typename
-  }
-}`;
+  }`;
 
   const postData = {
     operationName: null,
@@ -80,25 +68,36 @@ async function fetchContests() {
     });
 
     const json = response.data;
-
-    // Validate that the contest data exists
     if (!json.data || !json.data.allContests) {
       console.warn("Error: Missing contest data", JSON.stringify(json));
-      return;
+      return [];
     }
 
-    // Process and format each contest's details
-    const contests = json.data.allContests.map((c) => ({
+    return json.data.allContests.map((c) => ({
+      platform: "LeetCode",
       name: c.title,
       start_time: formatDate(c.originStartTime),
-      duration: c.duration / 60.0, // Convert duration from seconds to minutes
+      duration: c.duration / 60.0,
     }));
-
-    // Output the list of contests
-    console.log(contests);
   } catch (error) {
     console.error("Error fetching contests:", error);
+    return [];
   }
 }
 
-fetchContests();
+// Fetch past contests
+async function fetchPastLeetCodeContests() {
+  const contests = await fetchLeetCodeContests();
+  const now = Date.now() / 1000;
+  return contests.filter((contest) => new Date(contest.start_time).getTime() / 1000 < now);
+}
+
+// Fetch current and upcoming contests
+async function fetchCurrentAndUpcomingLeetCodeContests() {
+  const contests = await fetchLeetCodeContests();
+  const now = Date.now() / 1000;
+  return contests.filter((contest) => new Date(contest.start_time).getTime() / 1000 >= now);
+}
+
+// Export functions for use in other files
+export { fetchCurrentAndUpcomingLeetCodeContests, fetchPastLeetCodeContests };
