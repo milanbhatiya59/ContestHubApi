@@ -1,20 +1,12 @@
-import { getCurrentAndUpcomingCodechefContests } from "../services/codechef.service.js";
-import { getCurrentAndUpcomingCodeforcesContests } from "../services/codeforces.service.js";
-import { fetchCurrentAndUpcomingLeetCodeContests } from "../services/leetcode.service.js";
+import { UpcomingContest } from "../models/upcoming-contest.model.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getAllUpcomingContests = asyncHandler(async (req, res) => {
-  const codechef = await getCurrentAndUpcomingCodechefContests();
-  const codeforces = await getCurrentAndUpcomingCodeforcesContests();
-  const leetcode = await fetchCurrentAndUpcomingLeetCodeContests();
-
-  const contests = [...codechef, ...codeforces, ...leetcode];
-
-  contests.sort((a, b) => {
-    return new Date(a.start_time) - new Date(b.start_time);
-  });
-
-  res.json({ contests });
+  const contests = await UpcomingContest.find();
+  res
+    .status(200)
+    .json(new ApiResponse(200, contests, "All upcoming contests fetched successfully"));
 });
 
 export { getAllUpcomingContests };
