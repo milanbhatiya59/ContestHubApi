@@ -7,7 +7,7 @@ import { fetchCurrentAndUpcomingLeetCodeContests } from "../services/leetcode.se
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 cron.schedule(
-  "*/5 * * * *",
+  "*/10 * * * *",
   asyncHandler(async () => {
     const codechef = await getCurrentAndUpcomingCodechefContests();
     const codeforces = await getCurrentAndUpcomingCodeforcesContests();
