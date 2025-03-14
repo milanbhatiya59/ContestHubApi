@@ -1,0 +1,30 @@
+{
+  "name": "node-template",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "prettier --write . && nodemon -r dotenv/config index.js",
+    "start": "node index.js",
+    "lint": "eslint . --ext .js",
+    "format": "prettier --write ."
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "eslint": "^9.22.0",
+    "globals": "^16.0.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^4.1.0"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongoose": "^8.10.1"
+  }
+}
