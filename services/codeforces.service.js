@@ -1,6 +1,5 @@
 import axios from "axios";
 
-// Convert UTC timestamp to Indian Standard Time (IST) and format it
 const formatDateIST = (date) => {
   const options = {
     hour: "numeric",
@@ -9,16 +8,13 @@ const formatDateIST = (date) => {
     month: "long",
     year: "numeric",
     hour12: true,
-    timeZone: "Asia/Kolkata", // Indian Time Zone
+    timeZone: "Asia/Kolkata",
   };
 
   const formattedDate = date.toLocaleString("en-IN", options);
-
-  // Format "8:00 PM, 26 March 2025" to "8:00 PM 26 March 2025"
   return formattedDate.replace("at ", "").replace("pm", "PM").replace("am", "AM");
 };
 
-// Fetch past Codeforces contests (last 50 finished)
 const fetchPastCodeforcesContests = async () => {
   try {
     const response = await axios.get("https://codeforces.com/api/contest.list");
@@ -40,7 +36,6 @@ const fetchPastCodeforcesContests = async () => {
   }
 };
 
-// Fetch current and upcoming Codeforces contests
 const fetchCurrentAndUpcomingCodeforcesContests = async () => {
   try {
     const response = await axios.get("https://codeforces.com/api/contest.list");
@@ -54,7 +49,7 @@ const fetchCurrentAndUpcomingCodeforcesContests = async () => {
       platform: "Codeforces",
       name: contest.name,
       start_time: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
-      duration: contest.durationSeconds / 60, // Convert duration to minutes
+      duration: contest.durationSeconds / 60,
       youtube_tutorial: "",
       url: `https://codeforces.com/contest/${contest.id}`,
     }));
@@ -64,5 +59,4 @@ const fetchCurrentAndUpcomingCodeforcesContests = async () => {
   }
 };
 
-// Export functions for external use
 export { fetchCurrentAndUpcomingCodeforcesContests, fetchPastCodeforcesContests };

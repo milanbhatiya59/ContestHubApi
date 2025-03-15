@@ -1,14 +1,12 @@
 import axios from "axios";
 import { URL } from "url";
 
-// --- Configuration ---
 const config = {
-  URL: "https://www.codechef.com", // CodeChef base URL
-  HOST: "www.codechef.com", // Host name
-  RID: -1, // Some identifier (not used in output)
+  URL: "https://www.codechef.com",
+  HOST: "www.codechef.com",
+  RID: -1,
 };
 
-// Helper function to format date/time in IST
 function formatToIST(utcDateString) {
   const date = new Date(utcDateString);
   const options = {
@@ -21,19 +19,15 @@ function formatToIST(utcDateString) {
     year: "numeric",
   };
   const formattedDate = date.toLocaleString("en-IN", options);
-
-  // Format "8:00 PM, 26 March 2025" to "8:00 PM 26 March 2025"
   return formattedDate.replace("at ", "").replace("pm", "PM").replace("am", "AM");
 }
 
-// Function to calculate duration in minutes
 function calculateDuration(startTime, endTime) {
   const start = new Date(startTime);
   const end = new Date(endTime);
   return Math.floor((end - start) / (1000 * 60));
 }
 
-// Fetch data from an API
 async function httpGet(url, headers = {}) {
   try {
     const response = await axios.get(url, { headers });
@@ -44,7 +38,6 @@ async function httpGet(url, headers = {}) {
   }
 }
 
-// Fetch past contests (Last 100 Past)
 async function fetchPastCodechefContests() {
   const contests = await fetchCodeChefContests("past", 1000);
   return contests
@@ -60,7 +53,6 @@ async function fetchPastCodechefContests() {
     });
 }
 
-// Fetch current and upcoming contests
 async function fetchCurrentAndUpcomingCodechefContests() {
   const presentContests = await fetchCodeChefContests("present");
   const futureContests = await fetchCodeChefContests("future");
@@ -78,7 +70,6 @@ async function fetchCurrentAndUpcomingCodechefContests() {
     });
 }
 
-// Fetch CodeChef contests by type
 async function fetchCodeChefContests(time, maxPastContests = null) {
   const urlObj = new URL(config.URL);
   const urlSchemeHost = `${urlObj.protocol}//${urlObj.host}`;
@@ -111,5 +102,4 @@ async function fetchCodeChefContests(time, maxPastContests = null) {
   return contests;
 }
 
-// Export the functions for use in another file
 export { fetchCurrentAndUpcomingCodechefContests, fetchPastCodechefContests };

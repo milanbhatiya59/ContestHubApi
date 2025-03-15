@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// Helper function to format the date
-function formatDate(epochSeconds) {
+const formatDate = (epochSeconds) => {
   const date = new Date(epochSeconds * 1000);
   let hours = date.getHours();
   const minutes = date.getMinutes();
@@ -26,12 +25,10 @@ function formatDate(epochSeconds) {
   ];
   const monthName = months[date.getMonth()];
   const year = date.getFullYear();
-  const start_time = `${day} ${monthName} ${year} ${hours}:${minutesStr} ${ampm}`;
-  return start_time;
-}
+  return `${day} ${monthName} ${year} ${hours}:${minutesStr} ${ampm}`;
+};
 
-// Fetch LeetCode contests
-async function fetchLeetCodeContests() {
+const fetchLeetCodeContests = async () => {
   const url = "https://leetcode.com/graphql";
   const query = `
   {
@@ -83,10 +80,9 @@ async function fetchLeetCodeContests() {
     console.error("Error fetching contests:", error);
     return [];
   }
-}
+};
 
-// Fetch past contests
-async function fetchPastLeetCodeContests() {
+const fetchPastLeetCodeContests = async () => {
   const contests = await fetchLeetCodeContests();
   const now = Date.now() / 1000;
   return contests
@@ -95,12 +91,11 @@ async function fetchPastLeetCodeContests() {
     .map((contest) => ({
       ...contest,
       youtube_tutorial: "",
-      url: `https://leetcode.com/contest/${contest.name.toLowerCase().replace(" ", "-").replace(" ", "-")}`,
+      url: `https://leetcode.com/contest/${contest.name.toLowerCase().replace(/ /g, "-")}`,
     }));
-}
+};
 
-// Fetch current and upcoming contests
-async function fetchCurrentAndUpcomingLeetCodeContests() {
+const fetchCurrentAndUpcomingLeetCodeContests = async () => {
   const contests = await fetchLeetCodeContests();
   const now = Date.now() / 1000;
   return contests
@@ -108,9 +103,8 @@ async function fetchCurrentAndUpcomingLeetCodeContests() {
     .map((contest) => ({
       ...contest,
       youtube_tutorial: "",
-      url: `https://leetcode.com/contest/${contest.name.toLowerCase().replace(" ", "-").replace(" ", "-")}`,
+      url: `https://leetcode.com/contest/${contest.name.toLowerCase().replace(/ /g, "-")}`,
     }));
-}
+};
 
-// Export functions for use in other files
 export { fetchCurrentAndUpcomingLeetCodeContests, fetchPastLeetCodeContests };
