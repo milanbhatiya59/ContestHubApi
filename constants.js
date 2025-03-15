@@ -15,3 +15,6 @@ export const CORS_ORIGIN = getEnvVariable("CORS_ORIGIN");
 // Database Constants
 export const DATABASE_URI = getEnvVariable("DATABASE_URI");
 export const DATABASE_NAME = getEnvVariable("DATABASE_NAME");
+
+// Google API Constants
+export const GOOGLE_API_KEY = getEnvVariable("GOOGLE_API_KEY");

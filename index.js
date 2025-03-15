@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
+import "./cron/updatePastContests.cron.js";
 import "./cron/updateUpcomingContests.cron.js";
 
 import { app } from "./app.js";

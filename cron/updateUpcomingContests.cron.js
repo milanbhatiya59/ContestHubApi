@@ -1,16 +1,16 @@
 import cron from "node-cron";
 import { PastContest } from "../models/past-contest.model.js";
 import { UpcomingContest } from "../models/upcoming-contest.model.js";
-import { getCurrentAndUpcomingCodechefContests } from "../services/codechef.service.js";
-import { getCurrentAndUpcomingCodeforcesContests } from "../services/codeforces.service.js";
+import { fetchCurrentAndUpcomingCodechefContests } from "../services/codechef.service.js";
+import { fetchCurrentAndUpcomingCodeforcesContests } from "../services/codeforces.service.js";
 import { fetchCurrentAndUpcomingLeetCodeContests } from "../services/leetcode.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 cron.schedule(
   "*/10 * * * *",
   asyncHandler(async () => {
-    const codechef = await getCurrentAndUpcomingCodechefContests();
-    const codeforces = await getCurrentAndUpcomingCodeforcesContests();
+    const codechef = await fetchCurrentAndUpcomingCodechefContests();
+    const codeforces = await fetchCurrentAndUpcomingCodeforcesContests();
     const leetcode = await fetchCurrentAndUpcomingLeetCodeContests();
 
     const fetchedContests = [...codechef, ...codeforces, ...leetcode];
@@ -40,7 +40,13 @@ cron.schedule(
     }
 
     if (oldUpcomingContests.length > 0) {
-      await PastContest.insertMany(oldUpcomingContests);
+      const oldUpcomingContestsWithYoutubeField = oldUpcomingContests.map((contest) => ({
+        ...contest,
+        youtube_tutorial: "",
+      }));
+
+      await PastContest.insertMany(oldUpcomingContestsWithYoutubeField);
+
       await UpcomingContest.deleteMany({
         $or: oldUpcomingContests.map((contest) => ({
           platform: contest.platform,

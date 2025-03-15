@@ -20,6 +20,9 @@ const pastContestSchema = new Schema({
   youtube_tutorial: {
     type: String,
   },
+  url: {
+    type: String,
+  },
 });
 
 export const PastContest = mongoose.model("PastContest", pastContestSchema);

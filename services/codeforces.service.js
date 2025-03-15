@@ -19,19 +19,19 @@ const formatDateIST = (date) => {
 };
 
 // Fetch past Codeforces contests (last 50 finished)
-const getPastCodeforcesContests = async () => {
+const fetchPastCodeforcesContests = async () => {
   try {
     const response = await axios.get("https://codeforces.com/api/contest.list");
     const contests = response.data.result;
 
-    const pastContests = contests.filter((contest) => contest.phase === "FINISHED").slice(0, 50);
+    const pastContests = contests.filter((contest) => contest.phase === "FINISHED").slice(0, 200);
 
     return pastContests.map((contest) => ({
-      name: contest.name,
       platform: "Codeforces",
-      startTime: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
-      duration: contest.durationSeconds / 60, // Convert duration to minutes
-      status: contest.phase,
+      name: contest.name,
+      start_time: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
+      duration: contest.durationSeconds / 60,
+      youtube_tutorial: "",
       url: `https://codeforces.com/contest/${contest.id}`,
     }));
   } catch (error) {
@@ -41,7 +41,7 @@ const getPastCodeforcesContests = async () => {
 };
 
 // Fetch current and upcoming Codeforces contests
-const getCurrentAndUpcomingCodeforcesContests = async () => {
+const fetchCurrentAndUpcomingCodeforcesContests = async () => {
   try {
     const response = await axios.get("https://codeforces.com/api/contest.list");
     const contests = response.data.result;
@@ -63,4 +63,4 @@ const getCurrentAndUpcomingCodeforcesContests = async () => {
 };
 
 // Export functions for external use
-export { getCurrentAndUpcomingCodeforcesContests, getPastCodeforcesContests };
+export { fetchCurrentAndUpcomingCodeforcesContests, fetchPastCodeforcesContests };

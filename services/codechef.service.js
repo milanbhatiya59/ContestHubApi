@@ -45,12 +45,23 @@ async function httpGet(url, headers = {}) {
 }
 
 // Fetch past contests (Last 100 Past)
-async function getPastCodechefContests() {
-  return await fetchCodeChefContests("past", 100);
+async function fetchPastCodechefContests() {
+  const contests = await fetchCodeChefContests("past", 1000);
+  return contests
+    .filter((contest) => contest.name.includes("Starters "))
+    .map((contest) => {
+      const match = contest.name.match(/Starters (\d+)/);
+      const startersNumber = match ? match[1] : "";
+      return {
+        ...contest,
+        youtube_tutorial: "",
+        url: `https://codechef.com/START${startersNumber}`,
+      };
+    });
 }
 
 // Fetch current and upcoming contests
-async function getCurrentAndUpcomingCodechefContests() {
+async function fetchCurrentAndUpcomingCodechefContests() {
   const presentContests = await fetchCodeChefContests("present");
   const futureContests = await fetchCodeChefContests("future");
   return [...presentContests, ...futureContests];
@@ -90,4 +101,4 @@ async function fetchCodeChefContests(time, maxPastContests = null) {
 }
 
 // Export the functions for use in another file
-export { getCurrentAndUpcomingCodechefContests, getPastCodechefContests };
+export { fetchCurrentAndUpcomingCodechefContests, fetchPastCodechefContests };

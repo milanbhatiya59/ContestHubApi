@@ -89,7 +89,14 @@ async function fetchLeetCodeContests() {
 async function fetchPastLeetCodeContests() {
   const contests = await fetchLeetCodeContests();
   const now = Date.now() / 1000;
-  return contests.filter((contest) => new Date(contest.start_time).getTime() / 1000 < now);
+  return contests
+    .filter((contest) => new Date(contest.start_time).getTime() / 1000 < now)
+    .slice(0, 100)
+    .map((contest) => ({
+      ...contest,
+      youtube_tutorial: "",
+      url: `https://leetcode.com/contest/${contest.name.toLowerCase().replace(" ", "-").replace(" ", "-")}`,
+    }));
 }
 
 // Fetch current and upcoming contests

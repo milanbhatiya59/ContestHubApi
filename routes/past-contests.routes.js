@@ -1,9 +1,8 @@
 import { Router } from "express";
+import { getAllPastContests } from "../controllers/past-contests.controllers.js";
 
 const router = Router();
 
-router.route("/codeforces").get();
-router.route("/codechef").get();
-router.route("/leetcode").get();
+router.route("/").get(getAllPastContests);
 
 export default router;
