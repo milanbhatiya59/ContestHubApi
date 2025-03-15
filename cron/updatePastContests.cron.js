@@ -3,15 +3,21 @@ import { PastContest } from "../models/past-contest.model.js";
 import { fetchPlaylistVideos } from "../services/youtube.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-const processVideo = async (video) => {
+const processVideo = asyncHandler(async (video) => {
   const videoId = video.contentDetails.videoId;
   const videoTitle = video.snippet.title;
-  const publishedAt = new Date(video.snippet.publishedAt);
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-  const contest = await PastContest.find({
-    $or: [{ problemVideoIds: "" }, { solutionVideoIds: undefined }],
-  });
-};
+  const contests = await PastContest.find({ problemVideoIds: "" });
+
+  for (const contest of contests) {
+    if (contest.name.trim().toLowerCase() === videoTitle.trim().toLowerCase()) {
+      contest.youtube_tutorial = videoUrl;
+      await contest.save();
+      console.log(`Updated contest ${contest.name} with tutorial: ${videoUrl}`);
+    }
+  }
+});
 
 cron.schedule(
   "*/30 * * * *",
@@ -25,7 +31,10 @@ cron.schedule(
 
     for (const playlistId of playlists) {
       const videos = await fetchPlaylistVideos(playlistId);
-      videos.forEach((video) => processVideo(video));
+
+      for (const video of videos) {
+        await processVideo(video);
+      }
     }
   })
 );
