@@ -55,6 +55,8 @@ const fetchCurrentAndUpcomingCodeforcesContests = async () => {
       name: contest.name,
       start_time: formatDateIST(new Date(contest.startTimeSeconds * 1000)),
       duration: contest.durationSeconds / 60, // Convert duration to minutes
+      youtube_tutorial: "",
+      url: `https://codeforces.com/contest/${contest.id}`,
     }));
   } catch (error) {
     console.error("Error fetching current and upcoming Codeforces contests:", error);

@@ -64,7 +64,18 @@ async function fetchPastCodechefContests() {
 async function fetchCurrentAndUpcomingCodechefContests() {
   const presentContests = await fetchCodeChefContests("present");
   const futureContests = await fetchCodeChefContests("future");
-  return [...presentContests, ...futureContests];
+  const contests = [...presentContests, ...futureContests];
+  return contests
+    .filter((contest) => contest.name.includes("Starters "))
+    .map((contest) => {
+      const match = contest.name.match(/Starters (\d+)/);
+      const startersNumber = match ? match[1] : "";
+      return {
+        ...contest,
+        youtube_tutorial: "",
+        url: `https://codechef.com/START${startersNumber}`,
+      };
+    });
 }
 
 // Fetch CodeChef contests by type

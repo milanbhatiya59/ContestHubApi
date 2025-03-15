@@ -17,6 +17,12 @@ const upcomingContestSchema = new Schema({
     type: Number,
     required: true,
   },
+  youtube_tutorial: {
+    type: String,
+  },
+  url: {
+    type: String,
+  },
 });
 
 export const UpcomingContest = mongoose.model("UpcomingContest", upcomingContestSchema);

@@ -1,27 +1,29 @@
 import cron from "node-cron";
 import { PastContest } from "../models/past-contest.model.js";
 import { fetchPlaylistVideos } from "../services/youtube.service.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 
-const processVideo = asyncHandler(async (video) => {
-  const videoId = video.contentDetails.videoId;
-  const videoTitle = video.snippet.title;
-  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+const processVideo = async (video) => {
+  try {
+    const videoId = video.contentDetails.videoId;
+    const videoTitle = video.snippet.title;
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-  const contests = await PastContest.find({ problemVideoIds: "" });
+    const contests = await PastContest.find({ problemVideoIds: "" });
 
-  for (const contest of contests) {
-    if (contest.name.trim().toLowerCase() === videoTitle.trim().toLowerCase()) {
-      contest.youtube_tutorial = videoUrl;
-      await contest.save();
-      console.log(`Updated contest ${contest.name} with tutorial: ${videoUrl}`);
+    for (const contest of contests) {
+      if (contest.name.trim().toLowerCase() === videoTitle.trim().toLowerCase()) {
+        contest.youtube_tutorial = videoUrl;
+        await contest.save();
+        console.log(`Updated contest ${contest.name} with tutorial: ${videoUrl}`);
+      }
     }
+  } catch (error) {
+    console.error("Error processing video:", error);
   }
-});
+};
 
-cron.schedule(
-  "*/30 * * * *",
-  asyncHandler(async () => {
+cron.schedule("*/30 * * * *", async () => {
+  try {
     console.log("Fetching new YouTube videos...");
     const playlists = [
       "PLcXpkI9A-RZLUfBSNp-YQBCOezZKbDSgB",
@@ -36,5 +38,7 @@ cron.schedule(
         await processVideo(video);
       }
     }
-  })
-);
+  } catch (error) {
+    console.error("Error in cron job:", error);
+  }
+});
