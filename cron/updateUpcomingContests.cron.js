@@ -15,43 +15,40 @@ cron.schedule("*/30 * * * *", async () => {
     fetchedContests.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
     const existingContests = await UpcomingContest.find();
-
-    const areContestsEqual = (contestA, contestB) => {
-      return (
-        contestA.platform === contestB.platform &&
-        contestA.name === contestB.name &&
-        contestA.start_time === contestB.start_time &&
-        contestA.duration === contestB.duration
-      );
-    };
-
     const newUpcomingContests = fetchedContests.filter(
-      (fetched) => !existingContests.some((existing) => areContestsEqual(fetched, existing))
-    );
-
-    const oldUpcomingContests = existingContests.filter(
-      (existing) => !fetchedContests.some((fetched) => areContestsEqual(existing, fetched))
+      (fetched) =>
+        !existingContests.some(
+          (existing) =>
+            existing.platform === fetched.platform &&
+            existing.name === fetched.name &&
+            existing.start_time === fetched.start_time &&
+            existing.duration === fetched.duration
+        )
     );
 
     if (newUpcomingContests.length > 0) {
       await UpcomingContest.insertMany(newUpcomingContests);
+      console.log(`Added ${newUpcomingContests.length} new upcoming contests.`);
     }
 
-    if (oldUpcomingContests.length > 0) {
-      await PastContest.insertMany(oldUpcomingContests);
+    const currentTimeIST = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    );
 
+    const upcomingContests = await UpcomingContest.find();
+    const finishedContests = upcomingContests.filter((contest) => {
+      const contestStart = new Date(contest.start_time);
+      const contestEnd = new Date(contestStart.getTime() + contest.duration * 60000);
+      return contestEnd < currentTimeIST;
+    });
+
+    if (finishedContests.length > 0) {
+      await PastContest.insertMany(finishedContests);
       await UpcomingContest.deleteMany({
-        $or: oldUpcomingContests.map((contest) => ({
-          platform: contest.platform,
-          name: contest.name,
-          start_time: contest.start_time,
-          duration: contest.duration,
-        })),
+        _id: { $in: finishedContests.map((contest) => contest._id) },
       });
+      console.log(`Moved ${finishedContests.length} contests to PastContest.`);
     }
-
-    console.log(`Added ${newUpcomingContests.length} Upcoming contests.`);
-    console.log(`Moved ${oldUpcomingContests.length} contests to PastContest.`);
   } catch (error) {
     console.error("Error in cron job:", error);
   }

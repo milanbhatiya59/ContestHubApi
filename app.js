@@ -14,9 +14,11 @@ app.use(cookieParser());
 //routes import
 import pastContestsRoutes from "./routes/past-contests.routes.js";
 import upcomingContestsRoutes from "./routes/upcoming-contests.routes.js";
+import videosRoutes from "./routes/videos.routes.js";
 
 //routes declaration
 app.use("/api/v1/past-contests", pastContestsRoutes);
 app.use("/api/v1/upcoming-contests", upcomingContestsRoutes);
+app.use("/api/v1/videos", videosRoutes);
 
 export { app };
